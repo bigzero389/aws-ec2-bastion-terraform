@@ -4,6 +4,8 @@ provider "aws" {
   region = "ap-northeast-2"
 }
 
+# 기본적으로 원하는 tag 값을 셋팅한다. 
+# 단, 아래 세가지 태그는 계속 사용되므로 삭제시 확인 필요
 variable "tagging" {
   type = map
   default = {
@@ -11,15 +13,15 @@ variable "tagging" {
     creator = "dyheo"
     group = "HISTECH-bastion"
   }
-
 }
 
 locals {
+  # 내가 사용할 pem 파일명을 지정한다. pem 파일은 aws 에서 ec2 의 키 페어에서 미리 만들어서 보관하고 있어야 한다.
   pem_file = "dyheo-histech"
 
   ## EC2 를 만들기 위한 로컬변수 선언
   ami = "ami-0e4a9ad2eb120e054" ## AMAZON LINUX 2
-  instance_type = "t2.micro"
+  instance_type = "t2.micro"    ## 타입은 t2.micro
 }
 
 ## VPC ID 로 vpc id 를 가져온다.
@@ -46,7 +48,7 @@ resource "aws_security_group" "sg" {
       to_port          = 22
       protocol         = "tcp"
       type             = "ssh"
-      cidr_blocks      = ["125.177.68.23/32", "211.206.114.80/32"]
+      cidr_blocks      = ["125.177.68.23/32", "211.206.114.80/32"] ## ssh 로 접속할 공인IP 를 지정한다.
       #cidr_blocks      = ["211.206.114.80/32"]
       ipv6_cidr_blocks = ["::/0"]
       prefix_list_ids  = []
@@ -78,7 +80,7 @@ resource "aws_security_group" "sg" {
 
 # AWS EC2
 resource "aws_instance" "bastion" {
-  associate_public_ip_address = true
+  associate_public_ip_address = true  ## ec2 의 public ip 를 활성화한다.
 
   ami = "${local.ami}"
   instance_type = "${local.instance_type}"
@@ -88,12 +90,15 @@ resource "aws_instance" "bastion" {
   vpc_security_group_ids = ["${aws_security_group.sg.id}"]
 
   tags = {
-    Name = "${var.tagging["name"]}-ec2",
+    ## 이부분이 나중에 ec2 instance name 으로 된다. ansible 에서는 찾을 때 앞에 언더바 '_' 가 붙는것에 주의.
+    Name = "${var.tagging["name"]}-ec2",      
     Creator= "${var.tagging["creator"]}",
     Group = "${var.tagging["group"]}"
   }
 
-# EC2 preconfig
+## 만일 Ansible 을 사용하지 않고 Terraform 만으로 ec2 를 구성하는 경우,
+## ec2 의 user data 부분을 아래처럼 삽입하여 간단한 preconfing 를 구성할 수도 있다.
+  ## EC2 preconfig
 #  provisioner "remote-exec" {
 #    connection {
 #      host = self.public_ip
@@ -101,17 +106,19 @@ resource "aws_instance" "bastion" {
 #      private_key = "${file("~/.ssh/${local.pem_file}.pem")}"
 #    }
 #    inline = [
+       # epel repository setting
 #      "echo 'repository set'",
 #      "sudo yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -y",
 #      "sudo yum update -y"
 #    ]
 #  }
-  ## ANSIBLE playbook 을 삽입하는 경우 여기를 수정한다.
+
+  ## ANSIBLE playbook 을 통합 하는 경우 여기를 수정한다.
 #  provisioner "local-exec" {
-#    command = "echo '[inventory] \n${self.public_ip}' > ./inventory"
+#    command = "echo 'Terraform finished and Ansible running'"
 #  }
 #  provisioner "local-exec" {
-#    command = "ansible-playbook --private-key='~/.ssh/dyheo-histech-2.pem' -i inventory monolith.yml"
+#    command = "ansible-playbook ./bastion.yml"
 #  }
 }
 

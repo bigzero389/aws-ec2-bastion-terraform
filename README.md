@@ -23,6 +23,8 @@
 * $PWD/terraform plan
 * $PWD/terraform apply
 * $PWD/terraform destory # 만들어진 bastion 을 삭제하는 경우
+* $PWD/terraform show : grep public_ip # 만들어진 bastion 의 공인IP 를 확인한다. 
+* cf : 공인IP 는 eip 가 아니므로 ec2를 종료하면 변경된다. 
 
 ### Ansible 로 ec2 내부 환경설정
 * ansible-playbook ./bastion.yml
