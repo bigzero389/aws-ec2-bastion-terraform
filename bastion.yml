@@ -36,7 +36,3 @@
       tags:
         - pem-copy
 
-#  handlers:
-#    - name: change shell
-#      shell: 'chsh -s /bin/zsh ec2-user'
-
