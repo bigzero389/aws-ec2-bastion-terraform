@@ -1,0 +1,60 @@
+---
+# tasks file for zsh-setting
+- name: remove already installed
+  shell: rm -rf {{ oh_my_zsh_home }}/custom/themes/powerlevel10k {{ oh_my_zsh_home }}/plugins/zsh-autosuggestions
+
+#- name: check powerlevel10k_home
+#  stat:
+#    path: /home/ec2-user/.oh-my-zsh/custom/themes/powerlevel10k
+#  become: true
+#  become_user: ec2-user
+#  register: check_powerlevel10k_home
+
+- name: download oh-my-zsh powerlevel10k theme
+  shell: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /home/ec2-user/.oh-my-zsh/custom/themes/powerlevel10k
+  become: true
+  become_user: 'ec2-user'
+#  when: check_powerlevel10k_home.stat.exists == false
+
+#- name: check zsh_autosuggestions
+#  stat:
+#    path: /home/ec2-user/.oh-my-zsh/plugins/zsh-autosuggestions
+#  become: true
+#  become_user: ec2-user
+#  register: check_zsh_autosuggestions
+
+- name: download zsh autosuggestions
+  shell: |
+    git clone https://github.com/zsh-users/zsh-autosuggestions /home/ec2-user/.oh-my-zsh/plugins/zsh-autosuggestions
+  become: true
+  become_user: 'ec2-user'
+#  when: check_zsh_autosuggestions.stat.exists == false
+
+- name: zsh setting
+  lineinfile:
+    path: '~/.zshrc'
+    line: '{{ item.key }}="{{ item.value }}"'
+    regexp: '^{{ item.key }}='
+    state: present
+    owner: ec2-user
+    group: ec2-user
+    mode: 0644
+  loop:
+    - { key: ZSH_THEME, value: 'powerlevel10k/powerlevel10k' }
+    - { key: plugins, value: '(git zsh-autosuggestions)' }
+  register: zsh_setting
+
+- name: alias setting
+  lineinfile:
+    path: '~/.zshrc'
+    line: "alias {{ item.alias }}='{{ item.command }}'"
+    regexp: "^alias {{ item.alias }}="
+    state: present
+    owner: ec2-user
+    group: ec2-user
+    mode: 0644
+  loop:
+    - { alias: ll, command: "ls -lFhA" }
+    - { alias: l,  command: "ls -CF" }
+#    - { alias: la, command: "ls -lFhA" }
+  register: alias_setting

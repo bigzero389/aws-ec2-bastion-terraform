@@ -1,0 +1,47 @@
+---
+# tasks file for zsh-setting
+- name: install zsh
+  become: true
+  become_user: root
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - zsh
+    - git
+    - bash-completion
+    - util-linux-user
+
+- name: remove already installed
+  shell: rm -rf {{ ec2_user_home }}/.oh-my-zsh {{ ec2_user_home }}/.zshrc {{ ec2_user_home }}/install.sh
+
+- name: check oh-my-zsh install file
+  stat:
+    path: /home/ec2-user/install.sh
+  register: check_install_file
+
+#- name: display check_zsh_home result
+#  debug:
+#    var: check_install_file
+
+- name: download oh-my-zsh
+  get_url:
+    url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+    dest: /home/ec2-user
+    mode: 0755
+#  notify: oh-my-zsh install
+#  when: check_install_file.stat.exists == false
+
+- name: oh-my-zsh install
+  shell: 'sh install.sh'
+  args:
+    executable: /bin/bash
+    chdir: '/home/ec2-user'
+  async: 30
+  poll: 30
+
+- name: change shell
+  become: true
+  become_user: root
+  shell: 'chsh -s /bin/zsh ec2-user'
+  

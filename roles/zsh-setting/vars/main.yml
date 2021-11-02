@@ -1,0 +1,5 @@
+---
+# vars file for zsh-setting
+oh_my_zsh_home: '/home/ec2-user/.oh-my-zsh'
+
+

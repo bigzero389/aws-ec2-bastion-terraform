@@ -1,0 +1,17 @@
+---
+# tasks file for epel
+- name: EPEL repository install
+  command: amazon-linux-extras install epel -y
+  register: epel_status
+
+#- name: debug epel status
+#  debug:
+#    var: epel_status
+
+- name: Repository Update Latest
+  yum:
+    name: "*"
+    state: latest
+  when: epel_status["changed"] == true
+
+
