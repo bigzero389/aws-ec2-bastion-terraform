@@ -10,11 +10,18 @@
 * Terraform 설치 및 PATH 잡기
 * 환경변수에 AWS_ACCESS_KEY , AWS_SECRET_KEY 셋팅하기
 * pem 파일 만들고 local pc 에 ~/.ssh/ 밑에 배치하기
+* Windows 에서 Terraform 설치 및 환경변수 설정 [terraform setting] (https://infraboy.tistory.com/49)
+
 
 ### Ansible 설정
 * ansible 이 설치되어 있어야 한다.
 * ansible.cfg 를 구성한다.
 * inventory_aws_ec2.yml 을 이용하여 정해진 Tag Name 의 ec2 를 가져온다.
+* Windows 에서 AWS_SECRET_KEY/AWS_ACCESS_KEY 환경변수 설정 [aws key setting] (https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=shwotjd14&logNo=221226368685)
+```
+export AWS_ACCESS_KEY_ID='AAAAAAAAAAAAAAAAAAAAAAaaa'
+export AWS_SECRET_ACCESS_KEY='BBBBBBBBBBBBBBBBBbbbb'
+```
 
 ## 실행방법
 ### Terraform 으로 ec2 생성
